@@ -1,35 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Einstein Bot Chat</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Salesforce Embedded Chat - Test Page</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; margin: 2rem; }
+      .note { background:#f6f8fa; border-left:4px solid #2b7cff; padding:12px; margin-bottom:16px; }
+      .info { color: #333; font-size:0.95rem }
+    </style>
   </head>
   <body>
-    <h1>Welcome to My Einstein Bot Page</h1>
-    
-    <script type='text/javascript'>
-      function initEmbeddedMessaging() {
-        try {
-          embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
+    <h1>Salesforce Embedded Chat - Test Page</h1>
+    <div class="note">
+      <div class="info">
+        This page embeds the Embedded Service snippet from your Salesforce sandbox. Keep in mind:
+        <ul>
+          <li>Serve this page over <strong>HTTPS</strong> (browsers block mixed/secure resources otherwise).</li>
+          <li>Make sure the external site domain is added in Salesforce <strong>CORS</strong> and <strong>CSP Trusted Sites</strong> if required.</li>
+          <li>Do NOT open the SCRT URL directly in your browser — it is used by the chat widget internally.</li>
+        </ul>
+      </div>
+    </div>
 
-          embeddedservice_bootstrap.init(
-            '00DO800000B0ay1',
-            'EinsteinBot_EmbSvc',
-            'https://trimbledx--dxced.sandbox.my.site.com/ESWEinsteinBotEmbSvc1749020850085',
+    <p>Below is the exact snippet initialized using the values you provided. You can copy this file as <code>index.html</code> and upload to your webserver (HTTPS).</p>
+
+    <!-- Embedded Service: core library -->
+    <script src="https://service.force.com/embeddedservice/5.0/esw.min.js"></script>
+
+    <script>
+      // --- Configuration values (from your snippet)
+      var ORG_URL = 'https://trimbledx--dxced.sandbox.my.salesforce.com';
+      var SCRT_URL = 'https://trimbledx--dxced.sandbox.my.salesforce-scrt.com';
+      var ORG_ID = '00DO800000B0ay1';               // OrganizationId from your JSON
+      var DEPLOYMENT_NAME = 'Test_ChatBot';         // DeveloperName from your JSON
+
+      // Initialize the Embedded Service once the library is ready
+      function initEmbeddedService(gslbBaseURL) {
+        try {
+          embedded_svc.settings.displayHelpButton = true; // show the floating chat button
+          embedded_svc.settings.language = 'en';
+
+          // You can customize other settings here, for example:
+          // embedded_svc.settings.defaultMinimizedText = 'Chat with us';
+
+          embedded_svc.init(
+            ORG_URL,    // Salesforce org URL (not the scrt endpoint)
+            SCRT_URL,   // SCRT URL used internally by the widget
+            gslbBaseURL,
+            ORG_ID,
+            DEPLOYMENT_NAME,
             {
-              scrt2URL: 'https://trimbledx--dxced.sandbox.my.salesforce-scrt.com'
+              // optional: additional init config
             }
           );
-        } catch (err) {
-          console.error('Error loading Embedded Messaging: ', err);
-        }
-      };
-    </script>
 
-    <script type='text/javascript' 
-      src='https://trimbledx--dxced.sandbox.my.site.com/ESWEinsteinBotEmbSvc1749020850085/assets/js/bootstrap.min.js'
-      onload='initEmbeddedMessaging()'>
+          console.log('Embedded Service init called');
+        } catch (e) {
+          console.error('Error initializing Embedded Service:', e);
+        }
+      }
+
+      // If library already loaded, init immediately; otherwise wait for load
+      if (window.embedded_svc) {
+        initEmbeddedService(null);
+      } else {
+        var s = document.createElement('script');
+        s.src = 'https://service.force.com/embeddedservice/5.0/esw.min.js';
+        s.onload = function() { initEmbeddedService(null); };
+        s.onerror = function(err) { console.error('Failed to load esw.min.js', err); };
+        document.head.appendChild(s);
+      }
+
+      // Helpful: show network/console hints if something goes wrong
+      window.addEventListener('error', function(ev) {
+        console.warn('Page error event:', ev.message || ev);
+      });
     </script>
   </body>
 </html>
