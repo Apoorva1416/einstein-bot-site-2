@@ -1,74 +1,83 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Salesforce Embedded Chat - Test Page</title>
-    <style>
-      body { font-family: Arial, Helvetica, sans-serif; margin: 2rem; }
-      .note { background:#f6f8fa; border-left:4px solid #2b7cff; padding:12px; margin-bottom:16px; }
-      .info { color: #333; font-size:0.95rem }
-    </style>
-  </head>
-  <body>
-    <h1>Salesforce Embedded Chat - Test Page</h1>
-    <div class="note">
-      <div class="info">
-        This page embeds the Embedded Service snippet from your Salesforce sandbox.
-      </div>
-    </div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Salesforce Chat Embed - Test Page</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    .hint { background:#f6f8fa; border-left:4px solid #2b7cff; padding:12px; margin-bottom:16px; }
+  </style>
+</head>
+<body>
+  <h1>Salesforce Embedded Chat - Test Page</h1>
 
-    <!-- Embedded Service: core library -->
-    <script src="https://service.force.com/embeddedservice/5.0/esw.min.js"></script>
+  <div class="hint">
+  </div>
 
-    <script>
-      // --- Configuration values (from your snippet)
-      var ORG_URL = 'https://trimbledx--dxced.sandbox.my.salesforce.com';
-      var SCRT_URL = 'https://trimbledx--dxced.sandbox.my.salesforce-scrt.com';
-      var ORG_ID = '00DO800000B0ay1';               // OrganizationId from your JSON
-      var DEPLOYMENT_NAME = 'Test_ChatBot';         // DeveloperName from your JSON
+  <p>Click the chat button that appears (usually a floating help/chat icon) to start the bot.</p>
 
-      // Initialize the Embedded Service once the library is ready
-      function initEmbeddedService(gslbBaseURL) {
-        try {
-          embedded_svc.settings.displayHelpButton = true; // show the floating chat button
-          embedded_svc.settings.language = 'en';
+  <!-- Load the Embedded Service core library -->
+  <script src="https://service.force.com/embeddedservice/5.0/esw.min.js"></script>
 
-          // You can customize other settings here, for example:
-          // embedded_svc.settings.defaultMinimizedText = 'Chat with us';
+  <script>
+    // --- Values taken from the snippet you provided ---
+    // Organization host (use your org's URL; do NOT use the -scrt URL here)
+    var ORG_URL = 'https://trimbledx--dxced.sandbox.my.salesforce.com';
 
-          embedded_svc.init(
-            ORG_URL,    // Salesforce org URL (not the scrt endpoint)
-            SCRT_URL,   // SCRT URL used internally by the widget
-            gslbBaseURL,
-            ORG_ID,
-            DEPLOYMENT_NAME,
-            {
-              // optional: additional init config
-            }
-          );
+    // SCRT endpoint from your snippet (used internally by the widget)
+    var SCRT_URL = 'https://trimbledx--dxced.sandbox.my.salesforce-scrt.com';
 
-          console.log('Embedded Service init called');
-        } catch (e) {
-          console.error('Error initializing Embedded Service:', e);
+    // OrganizationId and DeveloperName from your JSON
+    var ORG_ID = '00DO800000B0ay1';
+    var DEPLOYMENT_NAME = 'Test_ChatBot';
+
+    function initEmbeddedService(gslbBaseURL) {
+      try {
+        // Optional custom settings
+        embedded_svc.settings.displayHelpButton = true;   // show the floating chat button
+        embedded_svc.settings.language = 'en';
+
+        // Initialize the Embedded Service widget
+        embedded_svc.init(
+          ORG_URL,         // Salesforce org url (NOT the scrt URL)
+          SCRT_URL,        // SCRT endpoint (from your snippet)
+          gslbBaseURL,     // usually null
+          ORG_ID,          // OrganizationId
+          DEPLOYMENT_NAME, // DeveloperName of the Embedded Service Deployment
+          {
+            // optional init configuration object
+            // e.g. prepopulatedPrechatFields, entryFeature, storageDomain etc.
+          }
+        );
+
+        console.log('Embedded Service initialized (init called).');
+      } catch (err) {
+        console.error('Error initializing Embedded Service:', err);
+      }
+    }
+
+    // If the library is already available, init immediately. Otherwise wait for onload.
+    if (window.embedded_svc) {
+      initEmbeddedService(null);
+    } else {
+      // esw.min.js is already included above, but in case it's not loaded yet:
+      window.addEventListener('load', function() {
+        if (window.embedded_svc) {
+          initEmbeddedService(null);
+        } else {
+          console.warn('embedded_svc lib not found after load.'); 
         }
-      }
-
-      // If library already loaded, init immediately; otherwise wait for load
-      if (window.embedded_svc) {
-        initEmbeddedService(null);
-      } else {
-        var s = document.createElement('script');
-        s.src = 'https://service.force.com/embeddedservice/5.0/esw.min.js';
-        s.onload = function() { initEmbeddedService(null); };
-        s.onerror = function(err) { console.error('Failed to load esw.min.js', err); };
-        document.head.appendChild(s);
-      }
-
-      // Helpful: show network/console hints if something goes wrong
-      window.addEventListener('error', function(ev) {
-        console.warn('Page error event:', ev.message || ev);
       });
-    </script>
-  </body>
+    }
+
+    // Helpful debugging hooks
+    window.addEventListener('error', function(e) {
+      console.warn('Page error:', e.message || e);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      console.warn('Unhandled promise rejection:', e.reason || e);
+    });
+  </script>
+</body>
 </html>
